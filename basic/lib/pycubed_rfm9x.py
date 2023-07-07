@@ -1205,10 +1205,10 @@ class Radiohead:
             if not bsd_checksum(packet[:-2]) == packet[-2:]:
                 if debug:
                     print(
-                        f"RFM9X: Checksum failed, packet = {str(packet)}, bsd_checksum(packet[:-2])" +
+                        f"RFM9X: Checksum Failed, packet = {str(packet)}, bsd_checksum(packet[:-2])" +
                         f" = {bsd_checksum(packet[:-2])}, packet[-2:] = {packet[-2:]}")
                 self.checksum_error_count += 1
-                return None
+                return packet[:-2]
             else:
                 # passed the checksum - remove it before continuing
                 packet = packet[:-2]
