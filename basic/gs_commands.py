@@ -219,7 +219,7 @@ async def wait_for_message(radio, max_rx_fails=10, debug=False):
     rx_fails = 0
     while True:
         res = await receive(radio, debug=debug)
-        
+        parse_message(b''.join(res))
         if res is None:
             rx_fails += 1
             if rx_fails > max_rx_fails:
