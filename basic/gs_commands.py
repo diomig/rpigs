@@ -8,6 +8,7 @@ from lib.radio_utils.commands import super_secret_code, commands, _pack, _unpack
 from shell_utils import bold, normal, red
 import time
 import struct
+import decoder
 try:
     import calendar
     HAS_CALENDAR = True
@@ -207,13 +208,18 @@ class _data:
         self.cmsg_last = bytes([])
 
 
+def parse_message(raw):
+    data = decoder.Prometheus.from_bytes(raw)
+    print('IMU TEMP: ', data.payload.imu.temp)
+
+
 async def wait_for_message(radio, max_rx_fails=10, debug=False):
     data = _data()
 
     rx_fails = 0
     while True:
         res = await receive(radio, debug=debug)
-        print('RES: ', res)
+        
         if res is None:
             rx_fails += 1
             if rx_fails > max_rx_fails:
@@ -228,7 +234,7 @@ async def wait_for_message(radio, max_rx_fails=10, debug=False):
         header, payload = res
 
         oh = header[4]
-        print(oh)
+        #print(oh)
         if oh == headers.DEFAULT or oh == headers.BEACON:
             return oh, payload
         elif oh == headers.MEMORY_BUFFERED_START or oh == headers.MEMORY_BUFFERED_MID or oh == headers.MEMORY_BUFFERED_END:
