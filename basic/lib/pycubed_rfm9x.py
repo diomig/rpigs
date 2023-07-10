@@ -1208,7 +1208,7 @@ class Radiohead:
                         f"RFM9X: Checksum Failed, packet = {str(packet)}, bsd_checksum(packet[:-2])" +
                         f" = {bsd_checksum(packet[:-2])}, packet[-2:] = {packet[-2:]}")
                 self.checksum_error_count += 1
-                return packet[:-2]
+                return packet
             else:
                 # passed the checksum - remove it before continuing
                 packet = packet[:-2]

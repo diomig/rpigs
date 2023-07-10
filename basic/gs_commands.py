@@ -210,7 +210,21 @@ class _data:
 
 def parse_message(raw):
     data = decoder.Prometheus.from_bytes(raw)
-    print('IMU TEMP: ', data.payload.imu.temp)
+    imu = data.payload.imu
+    print('ACCEL X: %7.4f' % imu.accel_x, end='\t\t')
+    print('ACCEL Y: %7.4f' % imu.accel_y, end='\t\t')
+    print('ACCEL Z: %7.4f' % imu.accel_z)
+
+    print('GYRO  X: %7.4f' % imu.gyro_x, end='\t\t')
+    print('GYRO  Y: %7.4f' % imu.gyro_y, end='\t\t')
+    print('GYRO  Z: %7.4f' % imu.gyro_z)
+
+    print('MAG   X: %7.4f' % imu.mag_x, end='\t\t')
+    print('MAG   Y: %7.4f' % imu.mag_y, end='\t\t')
+    print('MAG   Z: %7.4f' % imu.mag_z)
+
+    print('TEMP: %7.4f' % imu.temp)
+    print()
 
 
 async def wait_for_message(radio, max_rx_fails=10, debug=False):
@@ -219,7 +233,7 @@ async def wait_for_message(radio, max_rx_fails=10, debug=False):
     rx_fails = 0
     while True:
         res = await receive(radio, debug=debug)
-        parse_message(b''.join(res))
+        
         if res is None:
             rx_fails += 1
             if rx_fails > max_rx_fails:
@@ -232,7 +246,7 @@ async def wait_for_message(radio, max_rx_fails=10, debug=False):
             rx_fails = 0
 
         header, payload = res
-
+        parse_message(header+payload)
         oh = header[4]
         #print(oh)
         if oh == headers.DEFAULT or oh == headers.BEACON:
