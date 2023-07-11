@@ -210,6 +210,14 @@ class _data:
 
 def parse_message(raw):
     data = decoder.Prometheus.from_bytes(raw)
+    id = data.packet_id
+    if id is 0x00:
+        parse_telemtry(data)
+    else: 
+        print('IMAGE SEGMENT: ', id)
+        print(data.payload.segment)
+
+def parse_telemtry(data):
     imu = data.payload.imu
     print('ACCEL X: %7.4f' % imu.accel_x, end='\t\t')
     print('ACCEL Y: %7.4f' % imu.accel_y, end='\t\t')
@@ -226,6 +234,15 @@ def parse_message(raw):
     print('TEMP: %7.4f' % imu.temp)
     print()
 
+    sun_sensor = data.payload.sun_sensor
+    print('SUN X+: ', sun_sensor.sun_xp, 'SUN X-: ', sun_sensor.sun_xn)
+    print('SUN Y+: ', sun_sensor.sun_yp, 'SUN Y-: ', sun_sensor.sun_yn)
+    print('SUN Z+: ', sun_sensor.sun_zp, 'SUN Z-: ', sun_sensor.sun_zn)
+    print()
+
+    print('Battery Voltage: ', data.payload.vbatt, 'V')
+    print('CPU Temp: ', data.payload.cpu_temp, 'deg C')
+    print()
 
 async def wait_for_message(radio, max_rx_fails=10, debug=False):
     data = _data()
