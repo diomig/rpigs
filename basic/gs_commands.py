@@ -211,11 +211,12 @@ class _data:
 def parse_message(raw):
     data = decoder.Prometheus.from_bytes(raw)
     id = data.packet_id
-    if id is 0x00:
+    if id == 0x00:
         parse_telemtry(data)
     else: 
         print('IMAGE SEGMENT: ', id)
         print(data.payload.segment)
+        rebuid_image(data)
 
 def parse_telemtry(data):
     imu = data.payload.imu
@@ -243,6 +244,20 @@ def parse_telemtry(data):
     print('Battery Voltage: ', data.payload.vbatt, 'V')
     print('CPU Temp: ', data.payload.cpu_temp, 'deg C')
     print()
+
+def rebuid_image(data, storage):
+    id = data.packet_id
+    segment = data.payload.segment
+    total=19
+    if id not in storage:
+       storage.append({'id':id, 'seg':segment})
+    print([stg['id'] for stg in storage])
+    
+    if len(storage) < total:
+        return
+    print('GOT THEM ALL!!!')
+
+
 
 async def wait_for_message(radio, max_rx_fails=10, debug=False):
     data = _data()
