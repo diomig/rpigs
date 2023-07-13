@@ -167,8 +167,8 @@ async def receive(rfm9x, with_ack=True, debug=False):
     packet = await rfm9x.receive(with_ack=with_ack, with_header=True, debug=debug)
     if packet is None:
         return None
-    print(packet[4])
-    print(packet)
+    #print(packet[4])
+    #print(packet)
     return packet[0:5], packet[5:]
 
 
@@ -208,6 +208,7 @@ class _data:
         self.cmsg_last = bytes([])
 
 
+storage = []
 def parse_message(raw):
     data = decoder.Prometheus.from_bytes(raw)
     id = data.packet_id
@@ -216,7 +217,7 @@ def parse_message(raw):
     else: 
         print('IMAGE SEGMENT: ', id)
         print(data.payload.segment)
-        rebuid_image(data)
+        rebuid_image(data, storage)
 
 def parse_telemtry(data):
     imu = data.payload.imu
@@ -245,17 +246,24 @@ def parse_telemtry(data):
     print('CPU Temp: ', data.payload.cpu_temp, 'deg C')
     print()
 
+
 def rebuid_image(data, storage):
     id = data.packet_id
     segment = data.payload.segment
     total=19
-    if id not in storage:
+    summary = [stg['id'] for stg in storage]
+    if id not in summary:
        storage.append({'id':id, 'seg':segment})
-    print([stg['id'] for stg in storage])
+    print(summary)
     
     if len(storage) < total:
         return
+    storage = sorted(storage, key=lambda d: d['id'])
     print('GOT THEM ALL!!!')
+    image = b''.join([stg['seg'] for stg in storage])
+
+    with open("image.png", "wb") as file:
+        file.write(image)
 
 
 
@@ -304,11 +312,11 @@ async def wait_for_message(radio, max_rx_fails=10, debug=False):
 def print_message(header, message):
     if header == headers.DEFAULT:
         print(f"Default: {decode_message(message)}")
-    elif header == headers.BEACON:
-        print(beacon_str(message))
-    elif header == headers.MEMORY_BUFFERED_START or header == headers.DISK_BUFFERED_START:
-        print(f"Buffered:\n")
-        decode_message(message)
+    #elif header == headers.BEACON:
+    #    print(beacon_str(message))
+    #elif header == headers.MEMORY_BUFFERED_START or header == headers.DISK_BUFFERED_START:
+    #    print(f"Buffered:\n")
+    #    decode_message(message)
 
     else:
         print(f"Header {header} unknown: {decode_message(message)}")
