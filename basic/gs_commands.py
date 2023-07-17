@@ -210,13 +210,17 @@ class _data:
 
 storage = []
 def parse_message(raw):
-    data = decoder.Prometheus.from_bytes(raw)
+    try:
+        data = decoder.Prometheus.from_bytes(raw)
+    except:
+        print('WRONG DATA STRUCTURE!!!')
+        return
     id = data.packet_id
     if id == 0x00:
         parse_telemtry(data)
     else: 
-        print('IMAGE SEGMENT: ', id)
-        print(data.payload.segment)
+        print('IMAGE SEGMENT ', id, 'of', data.payload.total)
+        #print(data.payload.segment)
         rebuid_image(data, storage)
 
 def parse_telemtry(data):
